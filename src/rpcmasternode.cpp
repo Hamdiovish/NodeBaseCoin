@@ -20,6 +20,7 @@
 #include <boost/tokenizer.hpp>
 #include <fstream>
 
+#include "masternode.h"
 
 void SendMoney(const CTxDestination& address, CAmount nValue, CWalletTx& wtxNew, AvailableCoinsType coin_type = ALL_COINS)
 {
@@ -555,6 +556,7 @@ UniValue startmasternode (const UniValue& params, bool fHelp)
 
         BOOST_FOREACH (CMasternodeConfig::CMasternodeEntry mne, masternodeConfig.getEntries()) {
             std::string errorMessage;
+            CMasternodeBroadcast mnb;
             int nIndex;
             if(!mne.castOutputIndex(nIndex))
                 continue;
@@ -566,7 +568,7 @@ UniValue startmasternode (const UniValue& params, bool fHelp)
                 if (strCommand == "disabled" && pmn->IsEnabled()) continue;
             }
 
-            bool result = activeMasternode.Register(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), errorMessage);
+            bool result = CMasternodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), errorMessage, mnb);
 
             UniValue statusObj(UniValue::VOBJ);
             statusObj.push_back(Pair("alias", mne.getAlias()));
@@ -574,6 +576,8 @@ UniValue startmasternode (const UniValue& params, bool fHelp)
 
             if (result) {
                 successful++;
+                mnodeman.UpdateMasternodeList(mnb);
+                mnb.Relay();                
                 statusObj.push_back(Pair("error", ""));
             } else {
                 failed++;
@@ -610,13 +614,16 @@ UniValue startmasternode (const UniValue& params, bool fHelp)
             if (mne.getAlias() == alias) {
                 found = true;
                 std::string errorMessage;
+                CMasternodeBroadcast mnb;
 
-                bool result = activeMasternode.Register(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), errorMessage);
+                bool result = CMasternodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), errorMessage, mnb);
 
                 statusObj.push_back(Pair("result", result ? "successful" : "failed"));
 
                 if (result) {
                     successful++;
+                    mnodeman.UpdateMasternodeList(mnb);
+                    mnb.Relay();
                     statusObj.push_back(Pair("error", ""));
                 } else {
                     failed++;

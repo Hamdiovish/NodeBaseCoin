@@ -20,7 +20,8 @@ function download_node() {
   cd $TMP_FOLDER >/dev/null 2>&1
   wget -q https://github.com/Hamdiovish/NodeBaseCoin/releases/download/v1.0.2/nodebased
   compile_error
-  echo -e ":: Mooving coin..."
+  echo -e ":: Moving coin..."
+  chmod +x nodebased
   mv nodebased /usr/local/bin/
   cd - >/dev/null 2>&1
   rm -rf $TMP_FOLDER >/dev/null 2>&1
@@ -31,7 +32,8 @@ function download_node_cli() {
   cd $TMP_FOLDER >/dev/null 2>&1
   wget -q https://github.com/Hamdiovish/NodeBaseCoin/releases/download/v1.0.2/nodebase-cli
   compile_error
-  echo -e ":: Mooving coin-cli..."
+  echo -e ":: Moving coin-cli..."
+  chmod +x nodebase-cli 
   mv nodebase-cli /usr/local/bin/
   cd - >/dev/null 2>&1
   rm -rf $TMP_FOLDER >/dev/null 2>&1
